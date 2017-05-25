@@ -5,45 +5,32 @@ namespace EchoVS3
 {
     public class Node
     {
-        public List<IPEndPoint> neighbors = new List<IPEndPoint>();
+        public readonly List<IPEndPoint> NeighborEndPoints = new List<IPEndPoint>();
+        public readonly IPEndPoint NodeEndPoint;
+        public readonly IPEndPoint ParentNodeEndPoint;
 
-        private string _name;
-        private uint _size;
-        private string _ip;
-        private uint _port;
-
-        // Connection details to connect to logger
         private readonly IPEndPoint _loggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.2.2"), 1234);
 
-        // Address of the parent node
-        private readonly IPEndPoint _parentNodeEndPoint;
-
-        // Sum of the communicated size of received echo messages
-        private uint _receivedSize = 0;
-        private uint _numberOfNeighbors;
+        private readonly string _name;
+        private readonly uint _size;
+        
+        private uint _receivedEchoSize = 0;
+        private bool _isInformed = false;
+        private uint _informedNeighbors = 0;
 
         // Constructor
-        public Node(string name, uint size, string ip, uint port)
+        public Node(string name, uint size, IPEndPoint nodeEndPoint)
         {
             _name = name;
             _size = size;
-            _ip = ip;
-            _port = port;
+            NodeEndPoint = nodeEndPoint;
         }
-
 
         // Methods
         // Will be called, when a new message arrives
         public void ReactTo(Message message)
         {
-            
-        }
-
-        // Sends a message to the logger
-        private void Log(string message)
-        {
-            
-
+            // Filter by type
         }
     }
 }
