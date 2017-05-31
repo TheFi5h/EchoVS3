@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 
 namespace EchoVS3
 {
     public class Node
     {
+        public UdpClient UdpClient { get; set; }
+        public IPEndPoint ParentNodeEndPoint { get; set; }
+
         public readonly List<IPEndPoint> NeighborEndPoints = new List<IPEndPoint>();
         public readonly IPEndPoint NodeEndPoint;
-        public readonly IPEndPoint ParentNodeEndPoint;
         public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.2.2"), 1234);
 
         public readonly string Name;
@@ -28,17 +31,24 @@ namespace EchoVS3
 
         // Methods
         // Will be called, when a new message arrives
-        public void ReactTo(Message message)
+        public void ReactTo(IPEndPoint receivedFromEndPoint, Message message)
         {
+            _isInformed = true;
+
+            Log($"Node {Name} informed by {receivedFromEndPoint}.");
+
             // Increment informed neighbors
-            _neighborsInformed++;
+            _informedNeighbors++;
+
+
 
             switch (message.Type)
             {
                 case Type.Info:
-                    if (_parentNodeEndPoint == null)
+                    // If no parent set yet
+                    if (ParentNodeEndPoint == null)
                     {
-                        
+                        ParentNodeEndPoint = receivedFromEndPoint;
                     }
                     break;
                 case Type.Echo:
