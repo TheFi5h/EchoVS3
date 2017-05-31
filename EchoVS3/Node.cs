@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace EchoVS3
@@ -20,7 +21,7 @@ namespace EchoVS3
 
         // Sum of the communicated size of received echo messages
         private uint _receivedSize = 0;
-        private uint _numberOfNeighbors;
+        private uint _neighborsInformed;
 
         // Constructor
         public Node(string name, uint size, string ip, uint port)
@@ -36,14 +37,42 @@ namespace EchoVS3
         // Will be called, when a new message arrives
         public void ReactTo(Message message)
         {
-            
+            // Increment informed neighbors
+            _neighborsInformed++;
+
+            switch (message.Type)
+            {
+                case Type.Info:
+                    if (_parentNodeEndPoint == null)
+                    {
+                        
+                    }
+                    break;
+                case Type.Echo:
+
+                    break;
+                case Type.Logging:
+
+                        break;
+                default:
+                    Console.WriteLine("Unknown message type received: {0}", message.Type);
+                    break;
+            }
         }
 
         // Sends a message to the logger
         private void Log(string message)
         {
-            
+            // Build message package
+            Message loggingMessage = new Message(Type.Logging, 0, message);
 
+            // Send message to logger
+            
+        }
+
+        private void SendToNeighbors(Message message)
+        {
+            
         }
     }
 }
