@@ -46,7 +46,12 @@ namespace EchoVS3
             info.AddValue($"{nameof(Data)}", Data);
         }
 
-        public static byte[] ToByteArray(Message message)
+        public byte[] ToByteArray()
+        {
+            return Message.MessageToByteArray(this);
+        }
+
+        public static byte[] MessageToByteArray(Message message)
         {
             byte[] data;
 
@@ -67,7 +72,7 @@ namespace EchoVS3
             return data;
         }
 
-        public static Message ByteArrayToMessage(byte[] byteArray)
+        public static Message FromByteArray(byte[] byteArray)
         {
             using (var ms = new MemoryStream(byteArray))
             {

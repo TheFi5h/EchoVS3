@@ -27,6 +27,7 @@ namespace EchoVS3
             Name = name;
             Size = size;
             NodeEndPoint = nodeEndPoint;
+            UdpClient = new UdpClient(NodeEndPoint);
         }
 
         // Methods
@@ -37,14 +38,13 @@ namespace EchoVS3
 
             Log($"Node {Name} informed by {receivedFromEndPoint}.");
 
-            // Increment informed neighbors
-            _informedNeighbors++;
-
-
 
             switch (message.Type)
             {
                 case Type.Info:
+                    // Increment informed neighbors
+                    _informedNeighbors++;
+
                     // If no parent set yet
                     if (ParentNodeEndPoint == null)
                     {
@@ -69,13 +69,25 @@ namespace EchoVS3
             // Build message package
             Message loggingMessage = new Message(Type.Logging, 0, message);
 
+            // Convert message to byte array
+            byte[] messageByteArray = loggingMessage.ToByteArray();
+
             // Send message to logger
-            
+            UdpClient.Send(messageByteArray, messageByteArray.Length, LoggerEndPoint);
         }
 
+        // Sends a message to all neighbors
         private void SendToNeighbors(Message message)
         {
-            
+            // Convert message to byte array
+            byte[] messageByteArray = message.ToByteArray();
+
+            // Send message to all neighbors
+            foreach(var neighbor in NeighborEndPoints)
+            {
+                // Send UDP message
+                UdpClient.Send(messageByteArray, messageByteArray.Length, neighbor);
+            }
         }
     }
 }
