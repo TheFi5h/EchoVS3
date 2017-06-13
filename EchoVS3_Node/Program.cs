@@ -49,7 +49,7 @@ namespace EchoVS3_Node
 
         private static void SendLoggerMessage(Message message)
         {
-            byte[] messageBytes = Message.ToByteArray(message);
+            byte[] messageBytes = Message.MessageToByteArray(message);
             // Send message
             _loggerUdpClient.Send(messageBytes, messageBytes.Length);
         }
