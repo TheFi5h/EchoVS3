@@ -30,28 +30,7 @@ namespace EchoVS3_Node
                 return;
             }
 
-            // Create UDP Sockets
-            _nodeUdpClient = new UdpClient(_node.NodeEndPoint);
-
-            if (_debug)
-            {
-                // Assign logger Udp Client
-                _loggerUdpClient = new UdpClient(_node.LoggerEndPoint);
-
-                // Send message to logger
-                SendLoggerMessage(new Message(EchoVS3.Type.Logging, 0, $"Node Created: Name={_node.Name}, Size={_node.Size}, Neighbors={_node.NeighborEndPoints.Count}"));
-            }
-
-            // Wait for incoming package
-            // TODO
             
-        }
-
-        private static void SendLoggerMessage(Message message)
-        {
-            byte[] messageBytes = Message.MessageToByteArray(message);
-            // Send message
-            _loggerUdpClient.Send(messageBytes, messageBytes.Length);
         }
 
         private static Node ExtractParametersAndCreateNode(string[] args)
