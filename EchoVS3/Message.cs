@@ -57,8 +57,6 @@ namespace EchoVS3
 
         public static byte[] MessageToByteArray(Message message)
         {
-            byte[] data;
-
             using (var ms = new MemoryStream())
             {
                 try
@@ -70,29 +68,24 @@ namespace EchoVS3
                     Console.WriteLine($"Error: Error when parsing to byte array: {e.Message}");
                     throw;
                 }
-                data = ms.ToArray();
-            }
 
-            return data;
+                return ms.ToArray();
+            }
         }
 
         public static Message FromByteArray(byte[] byteArray)
         {
             using (var ms = new MemoryStream(byteArray))
             {
-                Message message;
-
                 try
                 {
-                    message = (Message) _binaryFormatter.Deserialize(ms);
+                    return (Message) _binaryFormatter.Deserialize(ms);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine($"Error: Error when parsing byte array to message: {e.Message}");
                     throw;
                 }
-
-                return message;
             }
         }
     }
