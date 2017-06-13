@@ -15,9 +15,7 @@ namespace EchoVS3
         public List<IPEndPoint> NeighborEndPoints = new List<IPEndPoint>();
         public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.2.2"), 1234);
 
-        private uint _receivedEchoSize = 0;
-        private bool _isInformed = false;
-        private uint _informedNeighbors = 0;
+        private bool _continueListening = true;
 
         // Constructor
         public Node(string name, uint size, IPEndPoint nodeEndPoint)
@@ -28,64 +26,85 @@ namespace EchoVS3
         }
 
         // Methods
-        // Will be called, when a new message arrives
-        private void ReactTo(IPEndPoint receivedFromEndPoint, Message message)
+        // Will start to listen and receive messages until stopped
+        private void Run()
         {
+            bool isInformed = false;
+            uint informedNeighbors = 0;
+            uint receivedEchoSize = 0;
 
-            switch (message.Type)
+            while (_continueListening)
             {
-                case Type.Info:
+                IPEndPoint receivedFromEndPoint = null;
+                var receivedBytes = UdpClient.Receive(ref receivedFromEndPoint);
+                Message message = null;
 
-                    // Increment informed neighbors
-                    _informedNeighbors++;
+                try
+                {
+                    // Try convert received bytes to message
+                    message = Message.FromByteArray(receivedBytes);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Byte array could not be converted to a message: " + e.Message);
+                    continue;
+                }
 
-                    if (!_isInformed)
-                    {
-                        Log($"Informed by {receivedFromEndPoint}.");
+                switch (message.Type)
+                {
+                    case Type.Info:
 
-                        // Remember informed
-                        _isInformed = true;
+                        // Increment informed neighbors
+                        informedNeighbors++;
 
-                        // Send information message to all neighbors
-                        SendToNeighbors(message);
-                    }
+                        if (!isInformed)
+                        {
+                            Log($"Informed by {receivedFromEndPoint}.");
 
-                    // If no parent set yet
-                    if (ParentNodeEndPoint == null)
-                    {
-                        Log($"Parent set to {receivedFromEndPoint}.");
-                        ParentNodeEndPoint = receivedFromEndPoint;
-                    }
+                            // Remember informed
+                            isInformed = true;
 
-                    break;
+                            // Send information message to all neighbors
+                            SendToNeighbors(message);
+                        }
 
-                case Type.Echo:
+                        // If no parent set yet
+                        if (ParentNodeEndPoint == null)
+                        {
+                            Log($"Parent set to {receivedFromEndPoint}.");
+                            ParentNodeEndPoint = receivedFromEndPoint;
+                        }
 
-                    Log($"Echo received from {receivedFromEndPoint}.");
+                        break;
 
-                    // Increment informed neighbors
-                    _informedNeighbors++;
+                    case Type.Echo:
 
-                    // Remember data
-                    _receivedEchoSize += uint.Parse(message.Data);
+                        Log($"Echo received from {receivedFromEndPoint}.");
 
-                    // Check if all neighbors informed
-                    if (_informedNeighbors == NeighborEndPoints.Count)
-                    {
-                        // Edit received message data
-                        message.Data = (_receivedEchoSize + Size).ToString();
+                        // Increment informed neighbors
+                        informedNeighbors++;
 
-                        // Send the message to the parent node
-                        SendToParent(message);
-                    }
+                        // Remember data
+                        receivedEchoSize += uint.Parse(message.Data);
 
-                    break;
+                        // Check if all neighbors informed
+                        if (informedNeighbors == NeighborEndPoints.Count)
+                        {
+                            // Edit received message data
+                            message.Data = (receivedEchoSize + Size).ToString();
 
-                case Type.Logging:
-                    throw new ArgumentException($"The given message type ({message.Type}) is not valid for this type of node", nameof(message.Type));
+                            // Send the message to the parent node
+                            SendToParent(message);
+                        }
 
-                default:
-                    throw new ArgumentException($"Unknown message type received: {message.Type}", nameof(message.Type));
+                        break;
+
+                    case Type.Logging:
+                        throw new ArgumentException($"The given message type ({message.Type}) is not valid for this type of node", nameof(message.Type));
+
+                    default:
+                        throw new ArgumentException($"Unknown message type received: {message.Type}", nameof(message.Type));
+                }
             }
         }
 
