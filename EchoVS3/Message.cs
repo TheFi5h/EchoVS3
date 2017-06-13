@@ -66,7 +66,7 @@ namespace EchoVS3
                 catch (Exception e)
                 {
                     Console.WriteLine($"Error: Error when parsing to byte array: {e.Message}");
-                    throw;
+                    return null;
                 }
 
                 return ms.ToArray();
@@ -84,7 +84,7 @@ namespace EchoVS3
                 catch (Exception e)
                 {
                     Console.WriteLine($"Error: Error when parsing byte array to message: {e.Message}");
-                    throw;
+                    return null;
                 }
             }
         }
