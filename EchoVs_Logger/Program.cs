@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EchoVs_Logger
+namespace EchoVS3_Logger
 {
     class Program
     {

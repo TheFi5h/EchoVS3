@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EchoVS_NodeCreator
+namespace EchoVS3_NodeCreator
 {
     class Program
     {
