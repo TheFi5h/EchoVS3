@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Message.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="NodeCreationInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Type.cs" />
   </ItemGroup>
