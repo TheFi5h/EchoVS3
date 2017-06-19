@@ -17,12 +17,24 @@ namespace EchoVS3
 
         private bool _continueListening = true;
 
-        // Constructor
+        // Constructors
         public Node(string name, uint size, IPEndPoint nodeEndPoint)
         {
             Name = name;
             Size = size;
             UdpClient = new UdpClient(nodeEndPoint);
+        }
+
+        public Node(NodeCreationInfo nodeCreationInfo)
+        {
+            Name = nodeCreationInfo.Name;
+            Size = nodeCreationInfo.Size;
+
+            // Create the udp client
+            UdpClient = new UdpClient(new IPEndPoint(IPAddress.Parse(nodeCreationInfo.Ip), nodeCreationInfo.Port));
+
+            // Add the neighbors
+            NeighborEndPoints.AddRange(nodeCreationInfo.Neighbors);
         }
 
         // Methods
