@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EchoVS3
 {
-    class NodeCreationInfo : ISerializable
+    public class NodeCreationInfo : ISerializable
     {
         public string Name { get; set; }
         public uint Size { get; set; }
