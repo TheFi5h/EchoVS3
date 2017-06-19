@@ -8,93 +8,84 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using EchoVS3;
+using System.Threading;
 
 namespace EchoVS3_Node
 {
     class Program
     {
         private static Node _node;
-        private static UdpClient _nodeUdpClient;
-        private static UdpClient _loggerUdpClient;
-        private static BinaryFormatter _binaryFormatter = new BinaryFormatter();
+        private static int configurationPort = 9999;
 
-        private const bool _debug = true;
+        private static byte[] receivedBytes;
+        private static bool messageReceived = true;
 
         static void Main(string[] args)
         {
-            _node = ExtractParametersAndCreateNode(args);
+            // Start to listen on the configuration port for configuration messages
+            var ipEndPoint = new IPEndPoint(IPAddress.Any, configurationPort);
+            var udpClient = new UdpClient(ipEndPoint);
+            var udpState = new UdpState(udpClient, ipEndPoint);
 
-            if (_node == null)
+            // Start listening to the configuration port
+            udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), new UdpState(udpClient, ipEndPoint));
+
+            // Start listening for keyboard input
+            do
             {
-                Console.WriteLine("Error: Node could not be created");
-                return;
-            }
+                // Will wait for either a message received or a key pressed
+                Thread.Sleep(100);
 
-            
+            } while (messageReceived != true && Console.KeyAvailable != true);
+
+            // Check what has been triggered
+            if(messageReceived)
+            {
+                // Convert received bytes to an node creation info object
+            }
+            else if(Console.KeyAvailable)
+            {
+                // Create a plain node creation info object
+                
+                // Start reading the inputs
+
+                Console.WriteLine("Bitte eigene IP angeben: ");
+                Console.ReadLine();
+
+                Console.WriteLine("Bitte Port angeben: ");
+                Console.ReadLine();
+
+            }
         }
 
-        private static Node ExtractParametersAndCreateNode(string[] args)
+        private static void ReceiveCallback(IAsyncResult result)
         {
-            // Set parametersLeft (Length - Path - Count of static parameters (name, size, ip, port, neighbor_ip, neighbor_port))
-            int parametersLeft = args.Length - 7;
-
-            // Extract parameters from args
-            // Parameters will be: name size ip port (ip port)+
-            if (args.Length < 7)
-                Console.WriteLine($"Error: Only {args.Length} parameters given. Minimum is 7 (First beeing the path)");
-
-            // 1 = name (string)
-            string name = args[1];
-
-            // 2 = size (uint)
-            if (!uint.TryParse(args[2], out uint size))
-                Console.WriteLine("Error: Third parameter (size) wasn't parsable. Must be unsigned int");
-
-            // 3 = ip (string)
-            string ip = args[3];
-
-            // 4 = port (uint)
-            if (!int.TryParse(args[4], out int port))
-                Console.WriteLine("Error: Fifth parameter (port) wasn't parsable. Must be int");
-
-            IPEndPoint nodeEndPoint = null;
             try
             {
-                nodeEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+                // Get the udp client saved in the udp state
+                var udpClient = ((UdpState)result.AsyncState).UdpClient;
+                var ipEndPoint = ((UdpState)result.AsyncState).IPEndPoint;
+
+                // Check what has been received and end receiving
+                receivedBytes = udpClient.EndReceive(result, ref ipEndPoint);
+                messageReceived = true;
             }
-            catch (Exception e)
+            catch(Exception)
             {
-                Console.WriteLine($"Error: Creating the IPEndpoint failed: {e.Message}");
+                // Catch the exception if the receiving was cancelled from outside
             }
+        }
 
-            List<IPEndPoint> neighbors = new List<IPEndPoint>();
-            int index = 5;
+        private class UdpState
+        {
+            public UdpClient UdpClient { get; }
+            public IPEndPoint IPEndPoint { get; }
 
-            // Keep extracting neighbors as long as possible
-            while (parametersLeft >= 2)
+            public UdpState(UdpClient udpClient, IPEndPoint ipEndPoint)
             {
-                if (!int.TryParse(args[4], out int neighborPort))
-                    Console.WriteLine($"Error: Parameter {index} (neighborPort) wasn't parsable. Must be int");
-
-                // Add the endpoint to the list
-                neighbors.Add(new IPEndPoint(IPAddress.Parse(args[index]), neighborPort));
-
-                parametersLeft -= 2;
+                UdpClient = udpClient;
+                IPEndPoint = ipEndPoint;
             }
-
-            // Check if endpoint could be created
-            if (nodeEndPoint != null)
-            {
-                // Create node
-                Node node = new Node(name, size, nodeEndPoint);
-
-                // Add neighbors to node
-                node.NeighborEndPoints.AddRange(neighbors);
-
-                return node;
-            }
-            else
-                return null;
         }
     }
 }
