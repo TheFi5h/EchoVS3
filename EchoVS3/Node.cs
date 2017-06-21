@@ -107,6 +107,7 @@ namespace EchoVS3
 
                             // Send the message to the parent node
                             SendToParent(message);
+                            Log($"Echo sent to parent: {ParentNodeEndPoint}.");
                         }
 
                         break;
