@@ -46,14 +46,41 @@ namespace EchoVS3_Node
             else if(Console.KeyAvailable)
             {
                 // Create a plain node creation info object
-                
+                NodeCreationInfo nodeCreationInfo = new EchoVS3.NodeCreationInfo();
+
                 // Start reading the inputs
+                Console.Write("Bitte eigene IP angeben: ");
+                nodeCreationInfo.Ip = Console.ReadLine();
 
-                Console.WriteLine("Bitte eigene IP angeben: ");
-                Console.ReadLine();
+                Console.Write("Bitte Port angeben: ");
+                nodeCreationInfo.Port = int.Parse(Console.ReadLine());
 
-                Console.WriteLine("Bitte Port angeben: ");
-                Console.ReadLine();
+                Console.Write("Bitte einen Namen für den Knoten eingeben: ");
+                nodeCreationInfo.Name = Console.ReadLine();
+
+                Console.Write("Bitte die Größe des Knotens angeben: ");
+                nodeCreationInfo.Size = uint.Parse(Console.ReadLine());
+
+                // Get n-times neighbor information
+                string input = "";
+
+                while(true)
+                {
+                    // Get ip for neighbor
+                    Console.Write("Bitte IP für Nachbar angeben (Hinzufügen beenden mit Enter ohne Eingabe): ");
+                    input = Console.ReadLine();
+
+                    // Check if enter pressed without input
+                    if (input == string.Empty)
+                        break;
+
+                    // Get port of neighbor
+                    Console.Write("Bitte Port für Nachbar angeben: ");
+                    var neighborEndPoint = new IPEndPoint(IPAddress.Parse(input), int.Parse(Console.ReadLine()));
+
+                    // Add the endpoint to the list
+                    nodeCreationInfo.Neighbors.Add(neighborEndPoint);
+                }
 
             }
         }
