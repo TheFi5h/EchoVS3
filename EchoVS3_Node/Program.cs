@@ -42,11 +42,29 @@ namespace EchoVS3_Node
             if(messageReceived)
             {
                 // Convert received bytes to an node creation info object
+                var nodeCreationInfo = NodeCreationInfo.FromByteArray(receivedBytes);
+
+                // Create the node with the given info
+                _node = new Node(nodeCreationInfo);
+
             }
             else if(Console.KeyAvailable)
             {
+                // Stop listening for udp messages
+                // Will trigger the EndReceive method but udp
+                try
+                {
+                    udpClient.Close();
+                }
+                catch (Exception)
+                {
+                    //MSDN suggests using Close method to cancel receive, but this will throw an ObjectDisposedException because
+                    // the EndReceive method is called on the disposed object
+                    //https://msdn.microsoft.com/en-us/library/dxkwh6zw.aspx
+                }
+
                 // Create a plain node creation info object
-                NodeCreationInfo nodeCreationInfo = new EchoVS3.NodeCreationInfo();
+                NodeCreationInfo nodeCreationInfo = new NodeCreationInfo();
 
                 // Start reading the inputs
                 Console.Write("Bitte eigene IP angeben: ");
