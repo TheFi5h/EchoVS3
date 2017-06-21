@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using EchoVS3;
 
 namespace EchoVS3_NodeNetworkCreator
 {
@@ -6,7 +8,11 @@ namespace EchoVS3_NodeNetworkCreator
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            // Create the single NodeCreationInfo objects
+            List<NodeCreationInfo> nodeCreationInfos = new List<NodeCreationInfo>
+            {
+
+            };
             
         }
     }
