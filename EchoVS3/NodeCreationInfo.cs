@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace EchoVS3
 {
@@ -36,6 +38,40 @@ namespace EchoVS3
             info.AddValue($"{nameof(Ip)}", Ip);
             info.AddValue($"{nameof(Port)}", Port);
             info.AddValue($"{nameof(Neighbors)}", Neighbors);
+        }
+
+        public static byte[] MessageToByteArray(NodeCreationInfo nodeCreationInfo)
+        {
+            using (var ms = new MemoryStream())
+            {
+                try
+                {
+                    (new BinaryFormatter()).Serialize(ms, nodeCreationInfo);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error: Error when parsing to byte array: {e.Message}");
+                    return null;
+                }
+
+                return ms.ToArray();
+            }
+        }
+
+        public static NodeCreationInfo FromByteArray(byte[] byteArray)
+        {
+            using (var ms = new MemoryStream(byteArray))
+            {
+                try
+                {
+                    return (NodeCreationInfo)(new BinaryFormatter()).Deserialize(ms);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error: Error when parsing byte array to nodeCreationInfo: {e.Message}");
+                    return null;
+                }
+            }
         }
     }
 }
