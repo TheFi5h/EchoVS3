@@ -182,7 +182,7 @@ namespace EchoVS3_Node
                                   $"Port: {_node.Port}");
             }
 
-            Printer.PrintLine("Starte Knoten... ");
+            Printer.Print("Starte Knoten... ");
 
             // Run node in task
             Task nodeTask = Task.Run(() =>
@@ -198,7 +198,7 @@ namespace EchoVS3_Node
                 }
             });
 
-            Printer.Print("OK", ConsoleColor.Green);
+            Printer.PrintLine("OK", ConsoleColor.Green);
             Printer.PrintLine("Beenden mit STOP/EXIT/QUIT");
             Printer.PrintLine("-----------------------------------------------------------");
 
@@ -253,7 +253,7 @@ namespace EchoVS3_Node
         {
             try
             {
-                Printer.Print("Nachricht erhalten. Empfange... ");
+                Printer.Print("Empfange Nachricht... ");
 
                 // Get the udp client saved in the udp state
                 var udpClient = ((UdpState)result.AsyncState).UdpClient;
