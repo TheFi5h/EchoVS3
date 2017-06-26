@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace EchoVS3
 {
+    [Serializable]
     public class NodeCreationInfo : ISerializable
     {
         public string Name { get; set; }
@@ -21,7 +22,6 @@ namespace EchoVS3
             Neighbors = new List<IPEndPoint>();
         }
 
-        // Constructor for deserialization
         public NodeCreationInfo(string name, uint size, string ip, int port, List<IPEndPoint> neighbors)
         {
             Name = name;
@@ -29,6 +29,16 @@ namespace EchoVS3
             Ip = ip;
             Port = port;
             Neighbors = new List<IPEndPoint>(neighbors);
+        }
+
+        // Constructor for deserialization
+        public NodeCreationInfo(SerializationInfo info, StreamingContext context)
+        {
+            Name = (string) info?.GetValue(nameof(Name), typeof(string)) ?? throw new ArgumentNullException(nameof(info));
+            Size = (uint)info.GetValue(nameof(Size), typeof(uint));
+            Ip = (string)info.GetValue(nameof(Ip), typeof(string));
+            Port = (int)info.GetValue(nameof(Port), typeof(int));
+            Neighbors = (List<IPEndPoint>) info.GetValue(nameof(Neighbors), typeof(List<IPEndPoint>));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
