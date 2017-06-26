@@ -21,7 +21,12 @@ namespace EchoVS3_Logger
             udpClient.Client.ReceiveTimeout = 10000;
             IPEndPoint senderIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
-            Console.ForegroundColor = ConsoleColor.White;
+            // Set console colors
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Clear();
+
+            Printer.Print("Starte");
 
             Task udpListenerTask = Task.Run(() =>
             {
@@ -105,10 +110,7 @@ namespace EchoVS3_Logger
 
                     return;
                 }
-                
             }
-
-            
         }
     }
 }

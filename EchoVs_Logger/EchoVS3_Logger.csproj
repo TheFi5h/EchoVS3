@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{11808FC1-BD4D-4DD1-9D65-D9991C5A6FCE}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>EchoVs_Logger</RootNamespace>
-    <AssemblyName>EchoVs_Logger</AssemblyName>
+    <RootNamespace>EchoVS3_Logger</RootNamespace>
+    <AssemblyName>EchoVS3_Logger</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
