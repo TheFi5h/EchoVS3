@@ -9,6 +9,8 @@ namespace EchoVS3
     {
         public string Name { get; }
         public uint Size { get; }
+        public IPAddress IPAddress { get; }
+        public int Port { get; }
         public IPEndPoint ParentNodeEndPoint { get; private set; }
         public UdpClient UdpClient { get; }
 
@@ -24,6 +26,8 @@ namespace EchoVS3
         {
             Name = name;
             Size = size;
+            IPAddress = nodeEndPoint.Address;
+            Port = nodeEndPoint.Port;
             UdpClient = new UdpClient(nodeEndPoint);
             UdpClient.Client.ReceiveTimeout = ReceiveTimeout;
         }
@@ -32,6 +36,9 @@ namespace EchoVS3
         {
             Name = nodeCreationInfo.Name;
             Size = nodeCreationInfo.Size;
+
+            IPAddress = IPAddress.Parse(nodeCreationInfo.Ip);
+            Port = nodeCreationInfo.Port;
 
             // Create the udp client
             UdpClient = new UdpClient(new IPEndPoint(IPAddress.Parse(nodeCreationInfo.Ip), nodeCreationInfo.Port));
