@@ -13,6 +13,10 @@ namespace EchoVS3_NodeNetworkCreator
     {
         static void Main()
         {
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.Clear();
+
             const int configurationPort = 9999;
 
             UdpClient udpClient = null;
