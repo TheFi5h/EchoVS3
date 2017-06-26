@@ -15,6 +15,8 @@ namespace EchoVS3_NodeNetworkCreator
         {
             const int configurationPort = 9999;
 
+            UdpClient udpClient = null;
+
             string nodeAIp = "192.168.0.105";
             string nodeBIp = "192.168.0.105";
             string nodeCIp = "192.168.0.105";
@@ -58,26 +60,62 @@ namespace EchoVS3_NodeNetworkCreator
                 )
             };
 
-            // Create UdpClient
-            var udpClient = new UdpClient(configurationPort);
-            IPEndPoint ipEndpoint = new IPEndPoint(IPAddress.Any, 0);
+            Printer.Print($"Starte UDP Client auf Port {configurationPort}... ");
+            try
+            {
+                // Create UdpClient
+                udpClient = new UdpClient(configurationPort);
+            }
+            catch (Exception e)
+            {
+                Printer.PrintLine("FAIL", ConsoleColor.Red);
+                Printer.PrintLine($"Exception caught while trying to create UDP Client: {e.Message}");
+            }
+            
+            Printer.PrintLine("OK", ConsoleColor.Green);
 
             // Send the initialization info to each point
             foreach (var nodeToBeCreated in nodeCreationInfos)
             {
+                IPEndPoint ipEndpoint = new IPEndPoint(IPAddress.Any, 0);
+
+                Printer.Print("Waiting for incoming package with port... ");
+
                 // Wait for incoming message on configuration port
                 byte[] incomingBytes = udpClient.Receive(ref ipEndpoint);
                 
+                Printer.PrintLine("OK", ConsoleColor.Green);
+
                 // Convert received bytes to int
                 int receivedPort = BitConverter.ToInt32(incomingBytes, 0);
 
+                Printer.PrintLine($"Empfanger Port: {receivedPort}");
+                Printer.Print($"Sende Knoten Informationen an {nodeToBeCreated.Ip}:{receivedPort}... ");
+
                 // Send the info to the current point
                 SendCreationInfoToNode(IPAddress.Parse(nodeToBeCreated.Ip), receivedPort, nodeToBeCreated);
+
+                Printer.PrintLine("OK", ConsoleColor.Green);
             }
 
-            // When finished start the logger process
-            Process loggerProcess = new Process {StartInfo = {FileName = "..\\..\\..\\EchoVs_logger\\bin\\Debug\\EchoVS3_Logger.exe"}};
-            loggerProcess.Start();
+            Printer.PrintLine("Konfiguration abgeschlossen. Starte Logger... ");
+
+            try
+            {
+                // When finished start the logger process
+                Process loggerProcess = new Process { StartInfo = { FileName = "..\\..\\..\\EchoVs_logger\\bin\\Debug\\EchoVS3_Logger.exe" } };
+                loggerProcess.Start();
+            }
+            catch (Exception e)
+            {
+                Printer.PrintLine("FAIL", ConsoleColor.Red);
+                Printer.PrintLine($"Exception caught while starting logger process: {e.Message}");
+            }
+
+            Printer.PrintLine("OK", ConsoleColor.Green);
+
+            Printer.PrintLine("Beliebige Taste zum Schließen drücken...");
+            Console.ReadKey();
         }
 
         private static void SendCreationInfoToNode(IPAddress ipAddress, int configurationPort, NodeCreationInfo nodeCreationInfo)
