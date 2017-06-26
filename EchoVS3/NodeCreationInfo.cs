@@ -16,7 +16,10 @@ namespace EchoVS3
         public List<IPEndPoint> Neighbors { get; set; }
 
         // Default constructor
-        public NodeCreationInfo() { }
+        public NodeCreationInfo()
+        {
+            Neighbors = new List<IPEndPoint>();
+        }
 
         // Constructor for deserialization
         public NodeCreationInfo(string name, uint size, string ip, int port, List<IPEndPoint> neighbors)
