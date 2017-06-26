@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EchoVS3\EchoVS3.csproj">
+      <Project>{F287CCE3-AA17-4674-B310-14D6EE4C5188}</Project>
+      <Name>EchoVS3</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
