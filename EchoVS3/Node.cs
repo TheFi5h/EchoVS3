@@ -13,9 +13,11 @@ namespace EchoVS3
         public UdpClient UdpClient { get; }
 
         public List<IPEndPoint> NeighborEndPoints = new List<IPEndPoint>();
-        public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.2.2"), 1234);
+        public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.0.105"), 1234);
 
         private bool _continueListening = true;
+
+        private const int ReceiveTimeout = 5000;
 
         // Constructors
         public Node(string name, uint size, IPEndPoint nodeEndPoint)
@@ -23,6 +25,7 @@ namespace EchoVS3
             Name = name;
             Size = size;
             UdpClient = new UdpClient(nodeEndPoint);
+            UdpClient.Client.ReceiveTimeout = ReceiveTimeout;
         }
 
         public Node(NodeCreationInfo nodeCreationInfo)
@@ -32,6 +35,7 @@ namespace EchoVS3
 
             // Create the udp client
             UdpClient = new UdpClient(new IPEndPoint(IPAddress.Parse(nodeCreationInfo.Ip), nodeCreationInfo.Port));
+            UdpClient.Client.ReceiveTimeout = ReceiveTimeout;
 
             // Add the neighbors
             NeighborEndPoints.AddRange(nodeCreationInfo.Neighbors);
@@ -39,7 +43,7 @@ namespace EchoVS3
 
         // Methods
         // Will start to listen and receive messages until stopped
-        private void Run()
+        public void Run()
         {
             bool isInformed = false;
             uint informedNeighbors = 0;
@@ -47,8 +51,29 @@ namespace EchoVS3
 
             while (_continueListening)
             {
+
                 IPEndPoint receivedFromEndPoint = null;
-                var receivedBytes = UdpClient.Receive(ref receivedFromEndPoint);
+                byte[] receivedBytes = { };
+
+                try
+                {
+                    receivedBytes = UdpClient.Receive(ref receivedFromEndPoint);
+                }
+                catch (SocketException e)
+                {
+                    if (e.SocketErrorCode == SocketError.TimedOut)
+                    {
+                        // If the task is not set to be cancelled continue listening
+                        if (_continueListening)
+                            continue;
+
+                        // Else -> cancel
+                        return;
+                    }
+                    
+                    Console.WriteLine($"Exception caught while trying to receive: {e.Message}");
+                    throw;
+                }
                 Message message;
 
                 try
@@ -119,6 +144,11 @@ namespace EchoVS3
                         throw new ArgumentException($"Unknown message type received: {message.Type}", nameof(message.Type));
                 }
             }
+        }
+
+        public void Stop()
+        {
+            _continueListening = false;
         }
 
         // Sends a message to the parent node
