@@ -13,22 +13,74 @@ namespace EchoVS3_Node
         private static Node _node;
         private static int configurationPort = 9999;
 
+        private static readonly IPEndPoint NodeNetworkCreatorIPEndPoint =
+            new IPEndPoint(IPAddress.Broadcast, configurationPort);
+
         private static byte[] _receivedBytes;
         private static bool _messageReceived;
 
         static void Main()
         {
+            // Choose random port to listen to
+            int randomPort = new Random((int) DateTime.Now.Ticks).Next(40000, ushort.MaxValue);
+
             // Start to listen on the configuration port for configuration messages
-            var ipEndPoint = new IPEndPoint(IPAddress.Any, configurationPort);
-            var udpClient = new UdpClient(ipEndPoint);
+            var ipEndPoint = new IPEndPoint(IPAddress.Any, randomPort);
             string input;
             bool printOnLateFinish = false;
+            UdpClient udpClient = null;
 
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.White;
             Console.Clear();
 
+
             Printer.Print($"Beginne Empfang von Netzwerkerstellungsnachrichten auf Port {configurationPort}... ");
+
+            while (true)
+            {
+                try
+                {
+                    udpClient = new UdpClient(ipEndPoint);
+                    byte[] portBytes = BitConverter.GetBytes(randomPort);
+
+                    // Send own config port to node network creator
+                    udpClient.Send(portBytes, portBytes.Length, NodeNetworkCreatorIPEndPoint);
+
+                    // If the udpClient could be created continue with program execution
+                    break;
+                }
+                catch (SocketException e)
+                {
+                    if (e.SocketErrorCode == SocketError.AddressAlreadyInUse)
+                    {
+                        Printer.PrintLine("FAIL", ConsoleColor.Red);
+
+                        do
+                        {
+                            Printer.Print("UDP-Socket wird bereits genutzt. Erneut versuchen? J/N ");
+
+                            // Wait for user input
+                            input = Console.ReadLine();
+
+                        } while (input != "J" && input != "j" && input != "N" && input != "n");
+
+                        if (input == "J" || input == "j")
+                        {
+                            Printer.Print("Versuche erneut... ");
+                            
+                            // Try again
+                            continue;
+                        }
+                        
+                        // Exit program
+                        return;
+                    }
+                    
+                    Printer.PrintLine($"Exception caught while creating UdpClient: {e.Message}");
+                    throw;
+                }
+            }
 
             // Start listening to the configuration port
             udpClient.BeginReceive(ReceiveCallback, new UdpState(udpClient, ipEndPoint));
@@ -112,7 +164,7 @@ namespace EchoVS3_Node
                 }
                 catch (Exception e)
                 {
-                    Printer.PrintLine("FAIL", ConsoleColor.Red); 
+                    Printer.PrintLine("FAIL", ConsoleColor.Red);
                     Printer.PrintLine($"Exception message: {e.Message}");
                     Printer.PrintLine("Beliebige Taste zum Verlassen drücken...");
 
@@ -143,7 +195,7 @@ namespace EchoVS3_Node
 
             Task nodeTaskWaiter = nodeTask.ContinueWith(nodeTaskResult =>
             {
-                if(printOnLateFinish)
+                if (printOnLateFinish)
                     Printer.PrintLine("Knoten beendet. Programm kann nun beendet werden.", ConsoleColor.Yellow);
             });
 
@@ -172,7 +224,7 @@ namespace EchoVS3_Node
 
             // Wait 10 seconds for task to finish
             if (nodeTask.Wait(TimeSpan.FromSeconds(5)))
-            {                
+            {
                 Printer.PrintLine("OK", ConsoleColor.Green);
                 Printer.PrintLine("Beliebige Taste zum Verlassen drücken...");
             }
