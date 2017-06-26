@@ -24,12 +24,16 @@ namespace EchoVS3_Node
             string input;
             bool printOnLateFinish = false;
 
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.Clear();
+
             Printer.Print($"Beginne Empfang von Netzwerkerstellungsnachrichten auf Port {configurationPort}... ");
 
             // Start listening to the configuration port
             udpClient.BeginReceive(ReceiveCallback, new UdpState(udpClient, ipEndPoint));
 
-            Printer.Print("OK", ConsoleColor.Green);
+            Printer.PrintLine("OK", ConsoleColor.Green);
 
             Printer.PrintLine("Für manuelle Erstellung des Knotens beliebige Taste drücken");
 
@@ -69,23 +73,23 @@ namespace EchoVS3_Node
                 NodeCreationInfo nodeCreationInfo = new NodeCreationInfo();
 
                 // Start reading the inputs
-                Console.Write("Bitte eigene IP angeben: ");
+                Printer.Print("Bitte eigene IP angeben: ");
                 nodeCreationInfo.Ip = Console.ReadLine();
 
-                Console.Write("Bitte Port angeben: ");
+                Printer.Print("Bitte Port angeben: ");
                 nodeCreationInfo.Port = int.Parse(Console.ReadLine());
 
-                Console.Write("Bitte einen Namen für den Knoten eingeben: ");
+                Printer.Print("Bitte einen Namen für den Knoten eingeben: ");
                 nodeCreationInfo.Name = Console.ReadLine();
 
-                Console.Write("Bitte die Größe des Knotens angeben: ");
+                Printer.Print("Bitte die Größe des Knotens angeben: ");
                 nodeCreationInfo.Size = uint.Parse(Console.ReadLine());
 
                 // Get n-times neighbor information
                 while (true)
                 {
                     // Get ip for neighbor
-                    Console.Write("Bitte IP für Nachbar angeben (Hinzufügen beenden mit Enter ohne Eingabe): ");
+                    Printer.Print("Bitte IP für Nachbar angeben (Hinzufügen beenden mit Enter ohne Eingabe): ");
                     input = Console.ReadLine();
 
                     // Check if enter pressed without input
@@ -93,14 +97,14 @@ namespace EchoVS3_Node
                         break;
 
                     // Get port of neighbor
-                    Console.Write("Bitte Port für Nachbar angeben: ");
+                    Printer.Print("Bitte Port für Nachbar angeben: ");
                     var neighborEndPoint = new IPEndPoint(IPAddress.Parse(input), int.Parse(Console.ReadLine()));
 
                     // Add the endpoint to the list
                     nodeCreationInfo.Neighbors.Add(neighborEndPoint);
                 }
 
-                Console.Write($"Erstelle Knoten mit {nodeCreationInfo.Neighbors.Count} Nachbarn... ");
+                Printer.Print($"Erstelle Knoten mit {nodeCreationInfo.Neighbors.Count} Nachbarn... ");
 
                 try
                 {
