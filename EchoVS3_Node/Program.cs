@@ -156,7 +156,7 @@ namespace EchoVS3_Node
                     nodeCreationInfo.Neighbors.Add(neighborEndPoint);
                 }
 
-                Printer.Print($"Erstelle Knoten mit {nodeCreationInfo.Neighbors.Count} Nachbarn... ");
+                Printer.Print($"Erstelle Knoten ... ");
 
                 try
                 {
@@ -174,10 +174,15 @@ namespace EchoVS3_Node
                 }
 
                 Printer.PrintLine("OK", ConsoleColor.Green);
+
+                Printer.PrintLine("Knoten erstellt:\n" +
+                                  $"Name: {_node.Name}\n" +
+                                  $"Größe: {_node.Size}\n" +
+                                  $"IP-Adresse: {_node.IPAddress}\n" +
+                                  $"Port: {_node.Port}");
             }
 
-            Printer.PrintLine("Starte Knoten. STOP/EXIT/QUIT eingeben zum Beenden!");
-            Printer.PrintLine("-----------------------------------------------------------");
+            Printer.PrintLine("Starte Knoten... ");
 
             // Run node in task
             Task nodeTask = Task.Run(() =>
@@ -192,6 +197,10 @@ namespace EchoVS3_Node
                     throw;
                 }
             });
+
+            Printer.Print("OK", ConsoleColor.Green);
+            Printer.PrintLine("Beenden mit STOP/EXIT/QUIT");
+            Printer.PrintLine("-----------------------------------------------------------");
 
             Task nodeTaskWaiter = nodeTask.ContinueWith(nodeTaskResult =>
             {
@@ -244,13 +253,26 @@ namespace EchoVS3_Node
         {
             try
             {
+                Printer.Print("Nachricht erhalten. Empfange... ");
+
                 // Get the udp client saved in the udp state
                 var udpClient = ((UdpState)result.AsyncState).UdpClient;
                 var ipEndPoint = ((UdpState)result.AsyncState).IPEndPoint;
 
-                // Check what has been received and end receiving
-                _receivedBytes = udpClient.EndReceive(result, ref ipEndPoint);
+                try
+                {
+                    // Check what has been received and end receiving
+                    _receivedBytes = udpClient.EndReceive(result, ref ipEndPoint);
+                }
+                catch (Exception e)
+                {
+                    Printer.PrintLine("FAIL", ConsoleColor.Red);
+                    Printer.PrintLine($"Exception caught while receiving package: {e.Message}");
+                    return;
+                }
+
                 _messageReceived = true;
+                Printer.PrintLine("OK", ConsoleColor.Green);
             }
             catch (Exception)
             {
