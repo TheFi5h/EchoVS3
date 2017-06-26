@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using EchoVS3;
+using Type = EchoVS3.Type;
 
 namespace EchoVS3_Logger
 {
@@ -15,18 +16,20 @@ namespace EchoVS3_Logger
             bool continueListening = true;
             string input = "";
             bool printOnLateFinish = false;
+            uint sequenceNumber = 0;
 
             // Start listening for messages
             UdpClient udpClient = new UdpClient(loggerPort);
             udpClient.Client.ReceiveTimeout = 10000;
             IPEndPoint senderIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            IPEndPoint masterNode = null;
 
             // Set console colors
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
             Console.Clear();
 
-            Printer.Print("Starte");
+            Printer.Print("Starte Logger... ");
 
             Task udpListenerTask = Task.Run(() =>
             {
@@ -59,9 +62,21 @@ namespace EchoVS3_Logger
                     Message incomingMessage = Message.FromByteArray(incomingByteArray);
 
                     // Print message
-                    Printer.PrintLine($"{DateTime.Now:T}: From: {senderIpEndPoint.Address}:{senderIpEndPoint.Port} | {incomingMessage.Data}");
+                    if (incomingMessage.Type == Type.Logging)
+                    {
+                        Printer.PrintLine(
+                            $"{DateTime.Now:T}: Von: {senderIpEndPoint.Address}:{senderIpEndPoint.Port} | {incomingMessage.Data}");
+                    }
+                    else if (incomingMessage.Type == Type.Echo)
+                    {
+                        Printer.PrintLine(
+                            $"{DateTime.Now:T}: Echo-Algorithmus (Seq: {incomingMessage.Number}) abgeschlossen. Data: {incomingMessage.Data}");
+                    }
                 }
             });
+
+            Printer.PrintLine("OK", ConsoleColor.Green);
+            Printer.Print("Starte Logger observer... ");
 
             // Start task that will print out that the listener has stopped if the timeout is already over
             Task callbackAfterFinishedTask = udpListenerTask.ContinueWith(listenerResult =>
@@ -69,6 +84,11 @@ namespace EchoVS3_Logger
                 if (printOnLateFinish)
                     Printer.PrintLine("Listener beendet. Programm kann nun beendet werden", ConsoleColor.Yellow);
             });
+
+            Printer.PrintLine("OK", ConsoleColor.Green);
+            Printer.PrintLine("Folgende Kommandos möglich:");
+            Printer.PrintLine("STOP/EXIT/QUIT - Logger beenden");
+            Printer.PrintLine("START - Echoanstoßmodus starten");
 
             while (true)
             {
@@ -109,6 +129,66 @@ namespace EchoVS3_Logger
                     Console.ReadKey();
 
                     return;
+                }
+
+                if (input == "START")
+                {
+                    try
+                    {
+                        if (masterNode == null)
+                        {
+                            Printer.PrintLine("Noch kein Masterknoten gesetzt.");
+
+                            // Ask for ip and port
+                            Printer.Print("Bitte IP für Masterknoten angeben: ");
+                            IPAddress ipAddress = IPAddress.Parse(Console.ReadLine());
+
+                            Printer.Print("Bitte Port für Masterknoten angeben");
+                            int port = int.Parse(Console.ReadLine());
+
+                            // Create ipEndPoint for master node
+                            masterNode = new IPEndPoint(ipAddress, port);
+                        }
+                        else
+                        {
+                            Printer.PrintLine($"Masterknoten bereits bekannt: {masterNode.Address}:{masterNode.Port}");
+                        }
+
+                        Printer.Print("Echo-Algorithmus starten? J/N ");
+
+                        input = Console.ReadLine();
+
+                        if(input != "J")
+                            continue;
+
+                        Printer.PrintLine($"Sende Startnachricht an Masterknoten (Seq: {sequenceNumber})... ");
+
+                        // Create starting message
+                        Message startingMessage = new Message(Type.Info, sequenceNumber, "ECHO_START");
+
+                        // Convert to byte array
+                        byte[] messageBytes = startingMessage.ToByteArray();
+
+                        // Send message to masternode
+                        try
+                        {
+                            udpClient.Send(messageBytes, messageBytes.Length, masterNode);
+                        }
+                        catch (Exception e)
+                        {
+                            Printer.PrintLine("FAIL", ConsoleColor.Red);
+                            Printer.PrintLine($"Exception caught while sending message to master node: {e.Message}", ConsoleColor.Red);
+                            continue;
+                        }
+                        
+                        Printer.PrintLine("OK", ConsoleColor.Green);
+                        Printer.PrintLine("Log:");
+                    }
+                    catch (Exception e)
+                    {
+                        Printer.PrintLine($"Exception caught while inputting information for master node: {e.Message}", ConsoleColor.Red);
+                        continue;
+                    }
                 }
             }
         }
