@@ -10,7 +10,7 @@ namespace EchoVS3_NodeNetworkCreator
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             const int configurationPort = 9999;
 

@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 using EchoVS3;
 using System.Threading;
 
@@ -17,10 +11,10 @@ namespace EchoVS3_Node
         private static Node _node;
         private static int configurationPort = 9999;
 
-        private static byte[] receivedBytes;
-        private static bool messageReceived = true;
+        private static byte[] _receivedBytes;
+        private static bool _messageReceived = true;
 
-        static void Main(string[] args)
+        static void Main()
         {
             // Start to listen on the configuration port for configuration messages
             var ipEndPoint = new IPEndPoint(IPAddress.Any, configurationPort);
@@ -28,7 +22,7 @@ namespace EchoVS3_Node
             var udpState = new UdpState(udpClient, ipEndPoint);
 
             // Start listening to the configuration port
-            udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), new UdpState(udpClient, ipEndPoint));
+            udpClient.BeginReceive(ReceiveCallback, new UdpState(udpClient, ipEndPoint));
 
             // Start listening for keyboard input
             do
@@ -36,13 +30,13 @@ namespace EchoVS3_Node
                 // Will wait for either a message received or a key pressed
                 Thread.Sleep(100);
 
-            } while (messageReceived != true && Console.KeyAvailable != true);
+            } while (_messageReceived != true && Console.KeyAvailable != true);
 
             // Check what has been triggered
-            if(messageReceived)
+            if(_messageReceived)
             {
                 // Convert received bytes to an node creation info object
-                var nodeCreationInfo = NodeCreationInfo.FromByteArray(receivedBytes);
+                var nodeCreationInfo = NodeCreationInfo.FromByteArray(_receivedBytes);
 
                 // Create the node with the given info
                 _node = new Node(nodeCreationInfo);
@@ -80,13 +74,11 @@ namespace EchoVS3_Node
                 nodeCreationInfo.Size = uint.Parse(Console.ReadLine());
 
                 // Get n-times neighbor information
-                string input = "";
-
                 while(true)
                 {
                     // Get ip for neighbor
                     Console.Write("Bitte IP für Nachbar angeben (Hinzufügen beenden mit Enter ohne Eingabe): ");
-                    input = Console.ReadLine();
+                    var input = Console.ReadLine();
 
                     // Check if enter pressed without input
                     if (input == string.Empty)
@@ -112,8 +104,8 @@ namespace EchoVS3_Node
                 var ipEndPoint = ((UdpState)result.AsyncState).IPEndPoint;
 
                 // Check what has been received and end receiving
-                receivedBytes = udpClient.EndReceive(result, ref ipEndPoint);
-                messageReceived = true;
+                _receivedBytes = udpClient.EndReceive(result, ref ipEndPoint);
+                _messageReceived = true;
             }
             catch(Exception)
             {

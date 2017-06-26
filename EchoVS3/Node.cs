@@ -49,7 +49,7 @@ namespace EchoVS3
             {
                 IPEndPoint receivedFromEndPoint = null;
                 var receivedBytes = UdpClient.Receive(ref receivedFromEndPoint);
-                Message message = null;
+                Message message;
 
                 try
                 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -16,7 +15,7 @@ namespace EchoVS3
         public string Data { get; set; }
 
 
-        private static readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
+        private static readonly BinaryFormatter BinaryFormatter = new BinaryFormatter();
 
 
         public Message(Type type, uint number, string data)
@@ -52,7 +51,7 @@ namespace EchoVS3
 
         public byte[] ToByteArray()
         {
-            return Message.MessageToByteArray(this);
+            return MessageToByteArray(this);
         }
 
         public static byte[] MessageToByteArray(Message message)
@@ -61,7 +60,7 @@ namespace EchoVS3
             {
                 try
                 {
-                    _binaryFormatter.Serialize(ms, message);
+                    BinaryFormatter.Serialize(ms, message);
                 }
                 catch (Exception e)
                 {
@@ -79,7 +78,7 @@ namespace EchoVS3
             {
                 try
                 {
-                    return (Message) _binaryFormatter.Deserialize(ms);
+                    return (Message) BinaryFormatter.Deserialize(ms);
                 }
                 catch (Exception e)
                 {
