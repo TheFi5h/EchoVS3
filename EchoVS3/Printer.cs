@@ -4,13 +4,16 @@ namespace EchoVS3
 {
     public static class Printer
     {
+        private static object _lock = new object();
+
         /// <summary>
         /// Prints a single line in the currently set color
         /// </summary>
         /// <param name="message">The message to print</param>
         public static void Print(string message)
         {
-            Console.Write(message);
+            lock(_lock)
+                Console.Write(message);
         }
 
         /// <summary>
@@ -20,10 +23,13 @@ namespace EchoVS3
         /// <param name="color">The color for the message</param>
         public static void Print(string message, ConsoleColor color)
         {
-            ConsoleColor temp = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.Write(message);
-            Console.ForegroundColor = temp;
+            lock (_lock)
+            {
+                ConsoleColor temp = Console.ForegroundColor;
+                Console.ForegroundColor = color;
+                Console.Write(message);
+                Console.ForegroundColor = temp;
+            }
         }
 
         /// <summary>
@@ -32,7 +38,8 @@ namespace EchoVS3
         /// <param name="message">The message to print</param>
         public static void PrintLine(string message)
         {
-            Console.WriteLine(message);
+            lock(_lock)
+                Console.WriteLine(message);
         }
 
         /// <summary>
@@ -42,12 +49,13 @@ namespace EchoVS3
         /// <param name="color">The color for the message</param>
         public static void PrintLine(string message, ConsoleColor color)
         {
-            ConsoleColor temp = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.WriteLine(message);
-            Console.ForegroundColor = temp;
+            lock (_lock)
+            {
+                ConsoleColor temp = Console.ForegroundColor;
+                Console.ForegroundColor = color;
+                Console.WriteLine(message);
+                Console.ForegroundColor = temp;
+            }
         }
-
-        
     }
 }
