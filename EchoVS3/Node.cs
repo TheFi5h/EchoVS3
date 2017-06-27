@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace EchoVS3
 {
@@ -15,7 +16,7 @@ namespace EchoVS3
         public UdpClient UdpClient { get; }
 
         public List<IPEndPoint> NeighborEndPoints = new List<IPEndPoint>();
-        public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.0.105"), 1234);
+        public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.178.29"), 1234);
 
         private bool _continueListening = true;
 
@@ -65,6 +66,7 @@ namespace EchoVS3
                 try
                 {
                     receivedBytes = UdpClient.Receive(ref receivedFromEndPoint);
+                    Thread.Sleep(3000);
                 }
                 catch (SocketException e)
                 {
@@ -99,7 +101,15 @@ namespace EchoVS3
                     case Type.Info:
 
                         // Increment informed neighbors
-                        informedNeighbors++;
+                        if (message.Data != "ECHO_START")
+                            informedNeighbors++;
+
+                        // If no parent set yet
+                        if (ParentNodeEndPoint == null)
+                        {
+                            Log($"Parent set to {receivedFromEndPoint}.");
+                            ParentNodeEndPoint = receivedFromEndPoint;
+                        }
 
                         if (!isInformed)
                         {
@@ -112,12 +122,7 @@ namespace EchoVS3
                             SendToNeighbors(message);
                         }
 
-                        // If no parent set yet
-                        if (ParentNodeEndPoint == null)
-                        {
-                            Log($"Parent set to {receivedFromEndPoint}.");
-                            ParentNodeEndPoint = receivedFromEndPoint;
-                        }
+                        Log($"Info received from {receivedFromEndPoint}.");
 
                         break;
 
@@ -131,17 +136,6 @@ namespace EchoVS3
                         // Remember data
                         receivedEchoSize += uint.Parse(message.Data);
 
-                        // Check if all neighbors informed
-                        if (informedNeighbors == NeighborEndPoints.Count)
-                        {
-                            // Edit received message data
-                            message.Data = (receivedEchoSize + Size).ToString();
-
-                            // Send the message to the parent node
-                            SendToParent(message);
-                            Log($"Echo sent to parent: {ParentNodeEndPoint}.");
-                        }
-
                         break;
 
                     case Type.Logging:
@@ -149,6 +143,18 @@ namespace EchoVS3
 
                     default:
                         throw new ArgumentException($"Unknown message type received: {message.Type}", nameof(message.Type));
+                }
+
+                // Check if all neighbors informed
+                if (informedNeighbors == NeighborEndPoints.Count)
+                {
+                    message.Type = Type.Echo;
+                    // Edit received message data
+                    message.Data = (receivedEchoSize + Size).ToString();
+
+                    // Send the message to the parent node
+                    SendToParent(message);
+                    Log($"Echo sent to parent: {ParentNodeEndPoint} with Data {message.Data}.");
                 }
             }
         }
@@ -175,14 +181,23 @@ namespace EchoVS3
         // Sends a message to all neighbors
         private void SendToNeighbors(Message message)
         {
+            // Create copy to send
+            Message newMessage = new Message(message.Type, message.Number, "");
+
             // Convert message to byte array
-            byte[] messageByteArray = message.ToByteArray();
+            byte[] messageByteArray = newMessage.ToByteArray();
 
             // Send message to all neighbors
             foreach (var neighbor in NeighborEndPoints)
             {
+                // The parent node is not a normal neighbor
+                if (neighbor.Address.Equals(ParentNodeEndPoint.Address) && neighbor.Port == ParentNodeEndPoint.Port)
+                    continue;
+
                 // Send UDP message
                 UdpClient.Send(messageByteArray, messageByteArray.Length, neighbor);
+
+                Log($"Info sent to: {neighbor} with Data {newMessage.Data}.");
             }
         }
 
@@ -197,6 +212,8 @@ namespace EchoVS3
 
             // Send message to logger
             UdpClient.Send(messageByteArray, messageByteArray.Length, LoggerEndPoint);
+
+            Printer.PrintLine($"{loggingMessage.Data}");
         }
     }
 }

@@ -34,7 +34,6 @@ namespace EchoVS3_Node
             Console.BackgroundColor = ConsoleColor.White;
             Console.Clear();
 
-
             Printer.Print($"Beginne Empfang von Netzwerkerstellungsnachrichten auf Port {configurationPort}... ");
 
             while (true)
@@ -87,7 +86,7 @@ namespace EchoVS3_Node
 
             Printer.PrintLine("OK", ConsoleColor.Green);
 
-            Printer.PrintLine("Für manuelle Erstellung des Knotens beliebige Taste drücken");
+            Printer.PrintLine("Für manuelle Erstellung des Knotens beliebige Taste drücken...");
 
             // Start listening for keyboard or network input
             do
@@ -103,8 +102,31 @@ namespace EchoVS3_Node
                 // Convert received bytes to an node creation info object
                 var nodeCreationInfo = NodeCreationInfo.FromByteArray(_receivedBytes);
 
-                // Create the node with the given info
-                _node = new Node(nodeCreationInfo);
+                Printer.Print($"Erstelle Knoten ... ");
+
+                try
+                {
+                    _node = new Node(nodeCreationInfo);
+                }
+                catch (Exception e)
+                {
+                    Printer.PrintLine("FAIL", ConsoleColor.Red);
+                    Printer.PrintLine($"Exception message: {e.Message}");
+                    Printer.PrintLine("Beliebige Taste zum Verlassen drücken...");
+
+                    // Wait for keypress
+                    Console.ReadKey();
+                    return;
+                }
+
+                Printer.PrintLine("OK", ConsoleColor.Green);
+
+                Printer.PrintLine("Knoten erstellt:");
+                Printer.PrintLine($"--Name: {_node.Name}");
+                Printer.PrintLine($"--Größe: {_node.Size}");
+                Printer.PrintLine($"--IP-Adresse: {_node.IPAddress}");
+                Printer.PrintLine($"--Port: {_node.Port}");
+
             }
             else if (Console.KeyAvailable)
             {
@@ -175,11 +197,11 @@ namespace EchoVS3_Node
 
                 Printer.PrintLine("OK", ConsoleColor.Green);
 
-                Printer.PrintLine("Knoten erstellt:\n" +
-                                  $"Name: {_node.Name}\n" +
-                                  $"Größe: {_node.Size}\n" +
-                                  $"IP-Adresse: {_node.IPAddress}\n" +
-                                  $"Port: {_node.Port}");
+                Printer.PrintLine("Knoten erstellt:");
+                Printer.PrintLine($"--Name: {_node.Name}");
+                Printer.PrintLine($"--Größe: {_node.Size}");
+                Printer.PrintLine($"--IP-Adresse: {_node.IPAddress}");
+                Printer.PrintLine($"--Port: {_node.Port}");
             }
 
             Printer.Print("Starte Knoten... ");
@@ -205,7 +227,7 @@ namespace EchoVS3_Node
             Task nodeTaskWaiter = nodeTask.ContinueWith(nodeTaskResult =>
             {
                 if (printOnLateFinish)
-                    Printer.PrintLine("Knoten beendet. Programm kann nun beendet werden.", ConsoleColor.Yellow);
+                    Printer.PrintLine("Knoten beendet. Programm kann nun beendet werden.", ConsoleColor.Blue);
             });
 
             // Clear input

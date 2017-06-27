@@ -21,10 +21,10 @@ namespace EchoVS3_NodeNetworkCreator
 
             UdpClient udpClient = null;
 
-            string nodeAIp = "192.168.0.105";
-            string nodeBIp = "192.168.0.105";
-            string nodeCIp = "192.168.0.105";
-            string nodeDIp = "192.168.0.105";
+            string nodeAIp = "192.168.178.29";
+            string nodeBIp = "192.168.178.29";
+            string nodeCIp = "192.168.178.29";
+            string nodeDIp = "192.168.178.29";
 
             int nodeAPort = 1111;
             int nodeBPort = 2222;
@@ -34,32 +34,32 @@ namespace EchoVS3_NodeNetworkCreator
             // Initialize list of creation infos
             List<NodeCreationInfo> nodeCreationInfos = new List<NodeCreationInfo>
             {
-                new NodeCreationInfo(name: "A", size: 3, ip: nodeAIp, port: nodeAPort, neighbors: new List<IPEndPoint>
+                new NodeCreationInfo(name: "A", size: 1, ip: nodeAIp, port: nodeAPort, neighbors: new List<IPEndPoint>
                     {
                         // Neighbors of first node
                         new IPEndPoint(IPAddress.Parse(nodeBIp), nodeBPort),
                         new IPEndPoint(IPAddress.Parse(nodeCIp), nodeCPort),
                     }
                 ),
-                new NodeCreationInfo(name: "B", size: 7, ip: nodeBIp, port: nodeBPort, neighbors: new List<IPEndPoint>
+                new NodeCreationInfo(name: "B", size: 2, ip: nodeBIp, port: nodeBPort, neighbors: new List<IPEndPoint>
                     {
                         // Neighbors of second node
                         new IPEndPoint(IPAddress.Parse(nodeAIp), nodeAPort),
-                        new IPEndPoint(IPAddress.Parse(nodeDIp), nodeCPort),
+                        new IPEndPoint(IPAddress.Parse(nodeDIp), nodeDPort),
                     }
                 ),
-                new NodeCreationInfo(name: "C", size: 11, ip: nodeCIp, port: nodeCPort, neighbors: new List<IPEndPoint>
+                new NodeCreationInfo(name: "C", size: 3, ip: nodeCIp, port: nodeCPort, neighbors: new List<IPEndPoint>
                     {
                         // Neighbors of third node
                         new IPEndPoint(IPAddress.Parse(nodeAIp), nodeAPort),
-                        new IPEndPoint(IPAddress.Parse(nodeBIp), nodeBPort),
+                        new IPEndPoint(IPAddress.Parse(nodeDIp), nodeDPort)
                     }
                 ),
-                new NodeCreationInfo(name: "D", size: 23, ip: nodeDIp, port: nodeDPort, neighbors: new List<IPEndPoint>
+                new NodeCreationInfo(name: "D", size: 4, ip: nodeDIp, port: nodeDPort, neighbors: new List<IPEndPoint>
                     {
                         // Neighbors of third node
-                        new IPEndPoint(IPAddress.Parse(nodeBIp), nodeAPort),
-                        new IPEndPoint(IPAddress.Parse(nodeCIp), nodeBPort),
+                        new IPEndPoint(IPAddress.Parse(nodeBIp), nodeBPort),
+                        new IPEndPoint(IPAddress.Parse(nodeCIp), nodeCPort),
                     }
                 )
             };
@@ -83,12 +83,12 @@ namespace EchoVS3_NodeNetworkCreator
             {
                 IPEndPoint ipEndpoint = new IPEndPoint(IPAddress.Any, 0);
 
-                Printer.Print("Waiting for incoming package with port... ");
+                Printer.Print("Waiting for incoming package... ");
 
                 // Wait for incoming message on configuration port
                 byte[] incomingBytes = udpClient.Receive(ref ipEndpoint);
                 
-                Printer.PrintLine("OK", ConsoleColor.Green);
+                Printer.PrintLine("PACKAGE RECEIVED", ConsoleColor.Green);
 
                 // Convert received bytes to int
                 int receivedPort = BitConverter.ToInt32(incomingBytes, 0);

@@ -70,7 +70,7 @@ namespace EchoVS3_Logger
                     else if (incomingMessage.Type == Type.Echo)
                     {
                         Printer.PrintLine(
-                            $"{DateTime.Now:T}: Echo-Algorithmus (Seq: {incomingMessage.Number}) abgeschlossen. Data: {incomingMessage.Data}");
+                            $"{DateTime.Now:T}: Echo-Algorithmus (Seq: {incomingMessage.Number}) abgeschlossen. Data: {incomingMessage.Data}", ConsoleColor.Green);
                     }
                 }
             });
@@ -82,7 +82,7 @@ namespace EchoVS3_Logger
             Task callbackAfterFinishedTask = udpListenerTask.ContinueWith(listenerResult =>
             {
                 if (printOnLateFinish)
-                    Printer.PrintLine("Listener beendet. Programm kann nun beendet werden", ConsoleColor.Yellow);
+                    Printer.PrintLine("Listener beendet. Programm kann nun beendet werden", ConsoleColor.Blue);
             });
 
             Printer.PrintLine("OK", ConsoleColor.Green);

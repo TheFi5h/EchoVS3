@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoVS3_Node", "EchoVS3_Nod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoVS3_NodeNetworkCreator", "EchoVS3_NodeNetworkCreator\EchoVS3_NodeNetworkCreator.csproj", "{7061CEE4-D92D-4680-8F07-9AE008634AB8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoVS_Starter", "EchoVS_Starter\EchoVS_Starter.csproj", "{8A8AD447-4D17-45E4-A005-CE5FF3822BD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{7061CEE4-D92D-4680-8F07-9AE008634AB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7061CEE4-D92D-4680-8F07-9AE008634AB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7061CEE4-D92D-4680-8F07-9AE008634AB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A8AD447-4D17-45E4-A005-CE5FF3822BD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A8AD447-4D17-45E4-A005-CE5FF3822BD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A8AD447-4D17-45E4-A005-CE5FF3822BD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A8AD447-4D17-45E4-A005-CE5FF3822BD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
