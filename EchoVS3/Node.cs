@@ -161,6 +161,7 @@ namespace EchoVS3
                     // Reset states to be ready for a new run of the algorithm
                     isInformed = false;
                     informedNeighbors = 0;
+                    receivedEchoSize = 0;
                 }
             }
         }
