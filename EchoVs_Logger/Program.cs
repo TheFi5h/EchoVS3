@@ -23,10 +23,10 @@ namespace EchoVS3_Logger
             udpClient.Client.ReceiveTimeout = 10000;
             IPEndPoint senderIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
             IPEndPoint masterNode = null;
-
+            
             // Set console colors
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
             Console.Clear();
 
             Printer.Print("Starte Logger... ");
@@ -65,7 +65,7 @@ namespace EchoVS3_Logger
                     if (incomingMessage.Type == Type.Logging)
                     {
                         Printer.PrintLine(
-                            $"{DateTime.Now:T}: Von: {senderIpEndPoint.Address}:{senderIpEndPoint.Port} | {incomingMessage.Data}");
+                            $"{DateTime.Now:T}: {incomingMessage.Data}");
                     }
                     else if (incomingMessage.Type == Type.Echo)
                     {
@@ -76,7 +76,7 @@ namespace EchoVS3_Logger
             });
 
             Printer.PrintLine("OK", ConsoleColor.Green);
-            Printer.Print("Starte Logger observer... ");
+            Printer.Print("Starte Logger Observer... ");
 
             // Start task that will print out that the listener has stopped if the timeout is already over
             Task callbackAfterFinishedTask = udpListenerTask.ContinueWith(listenerResult =>
@@ -88,7 +88,7 @@ namespace EchoVS3_Logger
             Printer.PrintLine("OK", ConsoleColor.Green);
             Printer.PrintLine("Folgende Kommandos möglich:");
             Printer.PrintLine("STOP/EXIT/QUIT - Logger beenden");
-            Printer.PrintLine("START - Echoanstoßmodus starten");
+            Printer.Print("START - Echoanstoßmodus starten\n>");
 
             while (true)
             {
@@ -143,7 +143,7 @@ namespace EchoVS3_Logger
                             Printer.Print("Bitte IP für Masterknoten angeben: ");
                             IPAddress ipAddress = IPAddress.Parse(Console.ReadLine());
 
-                            Printer.Print("Bitte Port für Masterknoten angeben");
+                            Printer.Print("Bitte Port für Masterknoten angeben: ");
                             int port = int.Parse(Console.ReadLine());
 
                             // Create ipEndPoint for master node
@@ -158,13 +158,13 @@ namespace EchoVS3_Logger
 
                         input = Console.ReadLine();
 
-                        if(input != "J")
+                        if(input != "J" && input != "j")
                             continue;
 
                         Printer.PrintLine($"Sende Startnachricht an Masterknoten (Seq: {sequenceNumber})... ");
 
                         // Create starting message
-                        Message startingMessage = new Message(Type.Info, sequenceNumber, "ECHO_START");
+                        Message startingMessage = new Message(Type.Info, sequenceNumber++, "ECHO_START");
 
                         // Convert to byte array
                         byte[] messageBytes = startingMessage.ToByteArray();

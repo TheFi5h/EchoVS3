@@ -4,7 +4,7 @@ namespace EchoVS3
 {
     public static class Printer
     {
-        private static object _lock = new object();
+        public static object Lock = new object();
 
         /// <summary>
         /// Prints a single line in the currently set color
@@ -12,7 +12,7 @@ namespace EchoVS3
         /// <param name="message">The message to print</param>
         public static void Print(string message)
         {
-            lock(_lock)
+            lock(Lock)
                 Console.Write(message);
         }
 
@@ -23,7 +23,7 @@ namespace EchoVS3
         /// <param name="color">The color for the message</param>
         public static void Print(string message, ConsoleColor color)
         {
-            lock (_lock)
+            lock (Lock)
             {
                 ConsoleColor temp = Console.ForegroundColor;
                 Console.ForegroundColor = color;
@@ -38,7 +38,7 @@ namespace EchoVS3
         /// <param name="message">The message to print</param>
         public static void PrintLine(string message)
         {
-            lock(_lock)
+            lock(Lock)
                 Console.WriteLine(message);
         }
 
@@ -49,7 +49,7 @@ namespace EchoVS3
         /// <param name="color">The color for the message</param>
         public static void PrintLine(string message, ConsoleColor color)
         {
-            lock (_lock)
+            lock (Lock)
             {
                 ConsoleColor temp = Console.ForegroundColor;
                 Console.ForegroundColor = color;

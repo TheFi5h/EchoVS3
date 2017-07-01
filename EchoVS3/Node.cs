@@ -16,11 +16,11 @@ namespace EchoVS3
         public UdpClient UdpClient { get; }
 
         public List<IPEndPoint> NeighborEndPoints = new List<IPEndPoint>();
-        public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.178.29"), 1234);
+        public readonly IPEndPoint LoggerEndPoint = new IPEndPoint(IPAddress.Parse("192.168.0.105"), 1234);
 
         private bool _continueListening = true;
 
-        private const int ReceiveTimeout = 5000;
+        private const int ReceiveTimeout = 3000;
 
         // Constructors
         public Node(string name, uint size, IPEndPoint nodeEndPoint)
@@ -61,12 +61,12 @@ namespace EchoVS3
             {
 
                 IPEndPoint receivedFromEndPoint = null;
-                byte[] receivedBytes = { };
+                byte[] receivedBytes;
 
                 try
                 {
                     receivedBytes = UdpClient.Receive(ref receivedFromEndPoint);
-                    Thread.Sleep(3000);
+                    Thread.Sleep(ReceiveTimeout);
                 }
                 catch (SocketException e)
                 {
@@ -155,6 +155,12 @@ namespace EchoVS3
                     // Send the message to the parent node
                     SendToParent(message);
                     Log($"Echo sent to parent: {ParentNodeEndPoint} with Data {message.Data}.");
+
+                    Printer.PrintLine($"-----------------END OF RUN: {message.Number}-----------------");
+
+                    // Reset states to be ready for a new run of the algorithm
+                    isInformed = false;
+                    informedNeighbors = 0;
                 }
             }
         }

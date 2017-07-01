@@ -30,8 +30,8 @@ namespace EchoVS3_Node
             bool printOnLateFinish = false;
             UdpClient udpClient = null;
 
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.BackgroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
             Console.Clear();
 
             Printer.Print($"Beginne Empfang von Netzwerkerstellungsnachrichten auf Port {configurationPort}... ");
@@ -80,13 +80,16 @@ namespace EchoVS3_Node
                     throw;
                 }
             }
+            lock (Printer.Lock)
+            {
+                // Start listening to the configuration port
+                udpClient.BeginReceive(ReceiveCallback, new UdpState(udpClient, ipEndPoint));
 
-            // Start listening to the configuration port
-            udpClient.BeginReceive(ReceiveCallback, new UdpState(udpClient, ipEndPoint));
+                Printer.PrintLine("OK", ConsoleColor.Green);
 
-            Printer.PrintLine("OK", ConsoleColor.Green);
+                Printer.PrintLine("Für manuelle Erstellung des Knotens beliebige Taste drücken...");
+            }
 
-            Printer.PrintLine("Für manuelle Erstellung des Knotens beliebige Taste drücken...");
 
             // Start listening for keyboard or network input
             do
