@@ -57,8 +57,17 @@ namespace EchoVS3
                 nodeConnections[secondNode].Add(firstNode);
             }
 
+            // Distinctify lists to ensure no duplicate entries
+            Dictionary<int, List<int>> returnDictionary = new Dictionary<int, List<int>>(nodeConnections.Count);
+
+            foreach (var nodeConnection in nodeConnections)
+            {
+                returnDictionary.Add(nodeConnection.Key, nodeConnection.Value.Distinct().ToList());
+            }
+
+
             // Return the finished dictionary with connections
-            return nodeConnections;
+            return returnDictionary;
         }
 
         private void CreatePrimaryConnections(Dictionary<int, List<int>> nodeConnections)

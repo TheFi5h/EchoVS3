@@ -56,6 +56,8 @@ namespace EchoVS_Starter
                 node.Start();
 
                 processes.Add(node);
+
+                Thread.Sleep(250);
             }
 
             Printer.PrintLine("\nErstellung abgeschlossen", ConsoleColor.Green);

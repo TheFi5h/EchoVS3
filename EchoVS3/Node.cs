@@ -20,7 +20,8 @@ namespace EchoVS3
 
         private bool _continueListening = true;
 
-        private const int ReceiveTimeout = 3000;
+        private const bool UseReceiveTimeout = true;
+        private const int MaxReceiveTimeout = 100;
 
         // Constructors
         public Node(string name, uint size, IPEndPoint nodeEndPoint)
@@ -30,7 +31,8 @@ namespace EchoVS3
             IPAddress = nodeEndPoint.Address;
             Port = nodeEndPoint.Port;
             UdpClient = new UdpClient(nodeEndPoint);
-            UdpClient.Client.ReceiveTimeout = ReceiveTimeout;
+            if(UseReceiveTimeout)
+                UdpClient.Client.ReceiveTimeout = new Random((int)DateTime.Now.Ticks).Next(MaxReceiveTimeout);
         }
 
         public Node(NodeCreationInfo nodeCreationInfo)
@@ -43,7 +45,8 @@ namespace EchoVS3
 
             // Create the udp client
             UdpClient = new UdpClient(new IPEndPoint(IPAddress.Parse(nodeCreationInfo.Ip), nodeCreationInfo.Port));
-            UdpClient.Client.ReceiveTimeout = ReceiveTimeout;
+            if (UseReceiveTimeout)
+                UdpClient.Client.ReceiveTimeout = new Random((int)DateTime.Now.Ticks).Next(MaxReceiveTimeout);
 
             // Add the neighbors
             NeighborEndPoints.AddRange(nodeCreationInfo.Neighbors);
@@ -66,7 +69,7 @@ namespace EchoVS3
                 try
                 {
                     receivedBytes = UdpClient.Receive(ref receivedFromEndPoint);
-                    Thread.Sleep(ReceiveTimeout);
+                    Thread.Sleep(MaxReceiveTimeout);
                 }
                 catch (SocketException e)
                 {
@@ -100,6 +103,8 @@ namespace EchoVS3
                 {
                     case Type.Info:
 
+                        Log($"{IPAddress}:{Port} recv INFO from {receivedFromEndPoint.Address}:{receivedFromEndPoint.Port} Data: \"{message.Data}\"");
+
                         // Increment informed neighbors
                         if (message.Data != "ECHO_START")
                             informedNeighbors++;
@@ -107,14 +112,11 @@ namespace EchoVS3
                         // If no parent set yet
                         if (ParentNodeEndPoint == null)
                         {
-                            Log($"Parent set to {receivedFromEndPoint}.");
                             ParentNodeEndPoint = receivedFromEndPoint;
                         }
 
                         if (!isInformed)
                         {
-                            Log($"Informed by {receivedFromEndPoint}.");
-
                             // Remember informed
                             isInformed = true;
 
@@ -122,13 +124,12 @@ namespace EchoVS3
                             SendToNeighbors(message);
                         }
 
-                        Log($"Info received from {receivedFromEndPoint}.");
 
                         break;
 
                     case Type.Echo:
 
-                        Log($"Echo received from {receivedFromEndPoint}.");
+                        Log($"{IPAddress}:{Port} recv ECHO from {receivedFromEndPoint.Address}:{receivedFromEndPoint.Port} Data: \"{message.Data}\"");
 
                         // Increment informed neighbors
                         informedNeighbors++;
@@ -154,7 +155,7 @@ namespace EchoVS3
 
                     // Send the message to the parent node
                     SendToParent(message);
-                    Log($"Echo sent to parent: {ParentNodeEndPoint} with Data {message.Data}.");
+                    Log($"{IPAddress}:{Port} send ECHO to {receivedFromEndPoint.Address}:{receivedFromEndPoint.Port} Data: \"{message.Data}\"");
 
                     Printer.PrintLine($"-----------------END OF RUN: {message.Number}-----------------");
 
@@ -204,7 +205,7 @@ namespace EchoVS3
                 // Send UDP message
                 UdpClient.Send(messageByteArray, messageByteArray.Length, neighbor);
 
-                Log($"Info sent to: {neighbor} with Data {newMessage.Data}.");
+                Log($"{IPAddress}:{Port} send INFO to {neighbor.Address}:{neighbor.Port} Data: \"{newMessage.Data}\"");
             }
         }
 
@@ -212,7 +213,7 @@ namespace EchoVS3
         private void Log(string message)
         {
             // Build message package
-            Message loggingMessage = new Message(Type.Logging, 0, $"Node {Name}: " + message);
+            Message loggingMessage = new Message(Type.Logging, 0, message);
 
             // Convert message to byte array
             byte[] messageByteArray = loggingMessage.ToByteArray();

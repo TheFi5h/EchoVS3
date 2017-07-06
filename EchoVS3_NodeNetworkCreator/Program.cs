@@ -50,14 +50,14 @@ namespace EchoVS3_NodeNetworkCreator
 
             } while (numberOfMaxConnections < 2);
 
-                Printer.Print("Bitte eine zufällige Zahl eingeben (Für gleiche Zufallswerte sieht das Netzwerk gleich aus): ");
+            Printer.Print("Bitte eine zufällige Zahl eingeben (Für gleiche Zufallswerte sieht das Netzwerk gleich aus): ");
             int randomSeed = int.Parse(Console.ReadLine());
 
             // Create random
             Random random = new Random(randomSeed);
 
             List<NodeCreationInfo> nodeCreationInfos = new List<NodeCreationInfo>();
-            List<int> usedPorts = new List<int>(numberOfNodes);
+            List<int> usedPorts = new List<int>();
 
             Printer.Print("Suche zufällige Ports für Endpunkte... ");
 
@@ -70,8 +70,11 @@ namespace EchoVS3_NodeNetworkCreator
                 do
                 {
                     // Min 1235 because logger is 1234
-                    port = random.Next(1235, ushort.MaxValue);
+                    port = random.Next(49152, ushort.MaxValue);
                 } while (usedPorts.Contains(port));
+
+                if(usedPorts.Distinct().ToList().Count != usedPorts.Count)
+                    throw new ArgumentException("The fuck?! This should never be possible!");
 
                 // Add the port to the used ports
                 usedPorts.Add(port);
@@ -82,7 +85,7 @@ namespace EchoVS3_NodeNetworkCreator
 
             Printer.PrintLine("OK", ConsoleColor.Green);
 
-            NodeNetworkGenerator nodeNetworkGenerator = new NodeNetworkGenerator(15);
+            NodeNetworkGenerator nodeNetworkGenerator = new NodeNetworkGenerator(15, numberOfMaxConnections);
 
             // Add the indexes of the nodes to the NodeNetworkGenerator
             nodeNetworkGenerator.Nodes.AddRange(Enumerable.Range(0, nodeCreationInfos.Count));
